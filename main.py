@@ -1,34 +1,57 @@
+import pandas as pd
+import tkinter as tk
+from tkinter import *
+import tkinter.font as tf
+import time
+import random
+import xlrd
+import csv
+from tkinter.filedialog import *
 
-from PIL import Image
-IMG = 'img.png'
+def window_init():
+    w=tk.Tk()
+    w.title("抓阄")
+    w.geometry("250x120")
+    return w
+def random_start(w,mate,text):
+    for i in mate:
+        text.set(i)
+        name=Label(w, font=ft, textvariable=text)
+        #name.pack() pack一次就加上去一次
+        w.update()#tk刷新
+        time.sleep(0.04)
+    l=len(mate)
+    i=random.randint(0,l-1)
+    text.set(mate[i])
 
-WIDTH = 80  # adjust
-HEIGHT = 40
+def read_mate():
+    return pd.read_csv('mate.csv')
 
-ascii_char = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
-
-
-# 将256灰度映射到70个字符上
-def get_char(r, g, b, alpha=256):  # alpha透明度
-    if alpha == 0:
-        return ' '
-    length = len(ascii_char)
-    gray = int(0.2126 * r + 0.7152 * g + 0.0722 * b)  # 计算灰度
-    unit = (256.0 + 1) / length
-    return ascii_char[int(gray / unit)]  # 不同的灰度对应着不同的字符
-    # 通过灰度来区分色块
-
-
-if __name__ == '__main__':
-    im = Image.open(IMG)
-    im = im.resize((WIDTH, HEIGHT), Image.NEAREST)
-    txt = ""
-    for i in range(HEIGHT):
-        for j in range(WIDTH):
-            txt += get_char(*im.getpixel((j, i)))
-        txt += '\n'
-
-    print(txt)
-    # 写入文件
-    with open("output.txt", 'w') as f:
-        f.write(txt)
+def init_csv():
+    epath = askopenfilename(title="选择excel")#放到第二列
+    data = xlrd.open_workbook(epath)
+    table = data.sheet_by_name('Sheet1')
+    coln = table.col_values(0)
+    print(coln) 
+    print(coln[1:])
+    f = open('mate.csv', 'w', encoding='utf-8')
+    csv_writer = csv.writer(f)
+    csv_writer.writerow(['name'])
+    for i in coln[0:]:
+        i = [i]
+        csv_writer.writerow(i)  # writerow 支持的是列表！！！
+    f.close()
+if __name__=='__main__':
+    w=window_init()
+    init_csv()
+    mate=read_mate()
+    print(mate)
+    mate=mate['name']
+    ft = tf.Font(family='微软雅黑', size=40, weight=tf.BOLD)  # 设置字体
+    text = StringVar()
+    text.set(mate[0])
+    name = Label(w,font=ft,textvariable=text)
+    name.pack()
+    start =Button(w, text="开始", width=7, command=lambda:random_start(w,mate,text))
+    start.pack()
+    w.mainloop()

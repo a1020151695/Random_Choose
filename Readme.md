@@ -1,1 +1,8 @@
-Show picture with character demo
+使用说明：
+
+选择名单的Excel表
+
+excel格式：
+
+1. 把所需名单放在名为'Sheet1'的工作表（没有则新建）
+2. 把名字放到第一列即可，不用表头
